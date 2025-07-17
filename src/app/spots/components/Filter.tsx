@@ -54,7 +54,7 @@ export default function Filter() {
 							checked={waterFountains}
 							onCheckedChange={setWaterFountains}
 							onSelect={e => e.preventDefault()}>
-							Fontaines à eau
+							Fontaines à boire
 						</DropdownMenuCheckboxItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -81,7 +81,7 @@ export default function Filter() {
 					)}
 					{waterFountains && (
 						<Badge variant='outline'>
-							Fontaines à eau{' '}
+							Fontaines à boire{' '}
 							<button
 								onClick={() => setWaterFountains(false)}
 								className='cursor-pointer'>
