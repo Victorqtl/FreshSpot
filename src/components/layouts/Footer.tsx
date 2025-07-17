@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function Footer() {
 	return (
 		<footer className='bg-secondary mt-[120px] h-48'>
-			<div className='px-6 2xl:px-0 h-full max-w-[1440px] mx-auto text-white flex flex-col justify-center'>
+			<div className='px-4 xl:px-0 h-full max-w-6xl mx-auto text-white flex flex-col justify-center'>
 				<Link href='/'>
 					<Image
 						src='/logo-white.png'
