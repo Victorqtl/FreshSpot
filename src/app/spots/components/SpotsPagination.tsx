@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 import {
 	Pagination,
@@ -28,10 +28,13 @@ export default function SpotsPagination({
 	hasPreviousPage,
 }: SpotsPaginationProps) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 
-	// Helper function to create the URLs
+	// Helper function to create the URLs with preserved search params
 	const createPageUrl = (page: number) => {
-		return `/spots?page=${page}`;
+		const params = new URLSearchParams(searchParams.toString());
+		params.set('page', page.toString());
+		return `/spots?${params.toString()}`;
 	};
 
 	// Memoize URLs to avoid recreating them - moved before conditional return
@@ -40,7 +43,7 @@ export default function SpotsPagination({
 			previous: createPageUrl(currentPage - 1),
 			next: createPageUrl(currentPage + 1),
 		}),
-		[currentPage]
+		[currentPage, searchParams]
 	);
 
 	if (totalPages <= 1) return null;

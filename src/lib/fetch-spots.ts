@@ -1,5 +1,6 @@
 import { Spot } from '@/types/spot';
 import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
+import { searchSpots } from '@/lib/search';
 
 // Fetch all spots from the APIs and return a unique list of spots
 
@@ -189,4 +190,32 @@ export async function getTotalSpotsCount(): Promise<number> {
 export function clearSpotsCache(): void {
 	cachedSpots = null;
 	cacheTimestamp = 0;
+}
+
+// Fetch spots with pagination and search - uses cache efficiently
+export async function fetchSpotsWithPaginationAndSearch(
+	page: number = 1,
+	limit: number = 8,
+	searchQuery?: string
+): Promise<PaginatedSpotsResult> {
+	const allSpots = await fetchAllSpots();
+
+	// Apply search filter if provided
+	const filteredSpots = searchQuery ? searchSpots(allSpots, searchQuery) : allSpots;
+
+	const totalCount = filteredSpots.length;
+	const totalPages = Math.ceil(totalCount / limit);
+	const startIndex = (page - 1) * limit;
+	const endIndex = startIndex + limit;
+
+	const spots = filteredSpots.slice(startIndex, endIndex);
+
+	return {
+		spots,
+		totalCount,
+		totalPages,
+		currentPage: page,
+		hasNextPage: page < totalPages,
+		hasPreviousPage: page > 1,
+	};
 }

@@ -8,10 +8,12 @@ export function PlaceholdersAndVanishInput({
 	placeholders,
 	onChange,
 	onSubmit,
+	searchValue,
 }: {
 	placeholders: string[];
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+	searchValue: string;
 }) {
 	const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
@@ -194,7 +196,7 @@ export function PlaceholdersAndVanishInput({
 				}}
 				onKeyDown={handleKeyDown}
 				ref={inputRef}
-				value={value}
+				value={searchValue}
 				type='text'
 				className={cn(
 					'w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-4 pr-20',
@@ -205,7 +207,7 @@ export function PlaceholdersAndVanishInput({
 			<button
 				disabled={!value}
 				type='submit'
-				className='absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-gray-100 bg-black dark:bg-zinc-900 dark:disabled:bg-zinc-800 transition duration-200 flex items-center justify-center'>
+				className='absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-gray-100 bg-primary dark:bg-zinc-900 dark:disabled:bg-zinc-800 transition duration-200 flex items-center justify-center'>
 				<motion.svg
 					xmlns='http://www.w3.org/2000/svg'
 					width='24'
