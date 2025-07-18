@@ -19,7 +19,7 @@ export interface ActivityData {
 	horaires_vendredi?: string;
 	horaires_samedi?: string;
 	horaires_dimanche?: string;
-	payant?: boolean;
+	payant?: string;
 }
 
 export interface GreenSpaceData {
@@ -41,9 +41,9 @@ export interface GreenSpaceData {
 	horaires_vendredi?: string;
 	horaires_samedi?: string;
 	horaires_dimanche?: string;
-	ouvert_24h?: boolean;
-	canicule_ouverture?: boolean;
-	ouverture_estivale_nocturne?: boolean;
+	ouvert_24h?: string;
+	canicule_ouverture?: string;
+	ouverture_estivale_nocturne?: string;
 	categorie?: string;
 }
 
@@ -56,5 +56,5 @@ export interface FountainData {
 		lon: number;
 	};
 	modele?: string;
-	dispo?: boolean;
+	dispo?: string;
 }

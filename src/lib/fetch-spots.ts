@@ -1,4 +1,4 @@
-import { Spot } from '@/types/spot';
+import { Spot, PaginatedSpotsResult, SpotCategory } from '@/types/spot';
 import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
 import { searchSpots } from '@/lib/search';
 
@@ -150,58 +150,113 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 	}
 }
 
-export interface PaginatedSpotsResult {
-	spots: Spot[];
-	totalCount: number;
-	totalPages: number;
-	currentPage: number;
-	hasNextPage: boolean;
-	hasPreviousPage: boolean;
+// Filter interface
+export interface SpotFilters {
+	categories?: SpotCategory[];
+	arrondissements?: string[];
+	types?: string[];
 }
 
-// Fetch spots with pagination - uses cache efficiently
-export async function fetchSpotsWithPagination(page: number = 1, limit: number = 8): Promise<PaginatedSpotsResult> {
+// Get unique values for filters
+export async function getFilterOptions(): Promise<{
+	categories: { value: SpotCategory; label: string }[];
+	arrondissements: { value: string; label: string }[];
+	types: { value: string; label: string; category: SpotCategory }[];
+}> {
 	const allSpots = await fetchAllSpots();
 
-	const totalCount = allSpots.length;
-	const totalPages = Math.ceil(totalCount / limit);
-	const startIndex = (page - 1) * limit;
-	const endIndex = startIndex + limit;
+	// Get unique arrondissements
+	const arrondissements = [...new Set(allSpots
+		.map(spot => spot.district)
+		.filter(district => district !== undefined && district !== null)
+		.map(district => district!.toString()))]
+		.sort((a, b) => {
+			// Sort Paris arrondissements first (750xx), then others
+			const aIsParis = a.startsWith('750');
+			const bIsParis = b.startsWith('750');
+			if (aIsParis && bIsParis) {
+				return parseInt(a.substring(3)) - parseInt(b.substring(3));
+			}
+			if (aIsParis) return -1;
+			if (bIsParis) return 1;
+			return a.localeCompare(b);
+		})
+		.map(district => ({
+			value: district,
+			label: district.startsWith('750') 
+				? `${parseInt(district.substring(3))}${district.substring(3) === '01' ? 'er' : 'e'} arrondissement`
+				: district
+		}));
 
-	const spots = allSpots.slice(startIndex, endIndex);
+	// Get unique types by category
+	const types = [...new Set(allSpots
+		.filter(spot => spot.type)
+		.map(spot => ({ type: spot.type!, category: spot.category })))]
+		.reduce((acc, curr) => {
+			const existing = acc.find(item => item.type === curr.type && item.category === curr.category);
+			if (!existing) {
+				acc.push(curr);
+			}
+			return acc;
+		}, [] as { type: string; category: SpotCategory }[])
+		.sort((a, b) => a.type.localeCompare(b.type))
+		.map(item => ({
+			value: item.type,
+			label: item.type,
+			category: item.category
+		}));
 
 	return {
-		spots,
-		totalCount,
-		totalPages,
-		currentPage: page,
-		hasNextPage: page < totalPages,
-		hasPreviousPage: page > 1,
+		categories: [
+			{ value: 'activities', label: 'Activités & Équipements' },
+			{ value: 'green_spaces', label: 'Espaces verts' },
+			{ value: 'water_fountains', label: 'Fontaines à boire' }
+		],
+		arrondissements,
+		types
 	};
 }
 
-// Get total count
-export async function getTotalSpotsCount(): Promise<number> {
-	const allSpots = await fetchAllSpots();
-	return allSpots.length;
+// Filter spots based on provided filters
+export function filterSpots(spots: Spot[], filters: SpotFilters): Spot[] {
+	let filteredSpots = spots;
+
+	// Filter by categories
+	if (filters.categories && filters.categories.length > 0) {
+		filteredSpots = filteredSpots.filter(spot => filters.categories!.includes(spot.category));
+	}
+
+	// Filter by arrondissements
+	if (filters.arrondissements && filters.arrondissements.length > 0) {
+		filteredSpots = filteredSpots.filter(spot => 
+			filters.arrondissements!.includes(spot.district?.toString() || '')
+		);
+	}
+
+	// Filter by types
+	if (filters.types && filters.types.length > 0) {
+		filteredSpots = filteredSpots.filter(spot => 
+			filters.types!.includes(spot.type || '')
+		);
+	}
+
+	return filteredSpots;
 }
 
-// Force cache refresh (useful for debugging or manual refresh)
-export function clearSpotsCache(): void {
-	cachedSpots = null;
-	cacheTimestamp = 0;
-}
-
-// Fetch spots with pagination and search - uses cache efficiently
+// Fetch spots with pagination, search, and filters - uses cache efficiently
 export async function fetchSpotsWithPaginationAndSearch(
 	page: number = 1,
 	limit: number = 8,
-	searchQuery?: string
+	searchQuery?: string,
+	filters?: SpotFilters
 ): Promise<PaginatedSpotsResult> {
 	const allSpots = await fetchAllSpots();
 
+	// Apply filters first
+	let filteredSpots = filters ? filterSpots(allSpots, filters) : allSpots;
+
 	// Apply search filter if provided
-	const filteredSpots = searchQuery ? searchSpots(allSpots, searchQuery) : allSpots;
+	filteredSpots = searchQuery ? searchSpots(filteredSpots, searchQuery) : filteredSpots;
 
 	const totalCount = filteredSpots.length;
 	const totalPages = Math.ceil(totalCount / limit);

@@ -17,12 +17,14 @@ export function SearchBar() {
 	}, [searchParams]);
 
 	const placeholders = [
-		'Parc ombragé',
-		'Lieu climatisé',
-		'Baignade extérieures',
-		'Fontaine à eau',
-		'Piscine plein air',
+		'Parc',
+		'Fontaine à boire',
+		'Baignade extérieure',
+		'Activités',
+		'Piscine',
 		'Espace vert',
+		'15e arrondissement',
+		'75006',
 	];
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

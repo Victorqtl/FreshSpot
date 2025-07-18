@@ -2,10 +2,17 @@ import { Suspense } from 'react';
 import { SearchBar } from './components/SearchBar';
 import Filter from './components/Filter';
 import Cards from './components/Cards';
-import { fetchSpotsWithPaginationAndSearch } from '@/lib/fetch-spots';
+import { fetchSpotsWithPaginationAndSearch, getFilterOptions, SpotFilters } from '@/lib/fetch-spots';
+import { SpotCategory } from '@/types/spot';
 
 interface SpotsPageProps {
-	searchParams: Promise<{ page?: string; search?: string }>;
+	searchParams: Promise<{ 
+		page?: string; 
+		search?: string; 
+		categories?: string; 
+		arrondissements?: string; 
+		types?: string; 
+	}>;
 }
 
 export default async function Spots({ searchParams }: SpotsPageProps) {
@@ -14,18 +21,50 @@ export default async function Spots({ searchParams }: SpotsPageProps) {
 	const searchQuery = resolvedSearchParams.search || '';
 	const itemsPerPage = 8;
 
-	const paginationData = await fetchSpotsWithPaginationAndSearch(currentPage, itemsPerPage, searchQuery);
+	// Parse filters from URL params
+	const filters: SpotFilters = {
+		categories: resolvedSearchParams.categories?.split(',').filter(Boolean) as SpotCategory[] || undefined,
+		arrondissements: resolvedSearchParams.arrondissements?.split(',').filter(Boolean) || undefined,
+		types: resolvedSearchParams.types?.split(',').filter(Boolean) || undefined,
+	};
 
+	// Get filter options and pagination data
+	const [filterOptions, paginationData] = await Promise.all([
+		getFilterOptions(),
+		fetchSpotsWithPaginationAndSearch(currentPage, itemsPerPage, searchQuery, filters)
+	]);
+
+	const startItem = (currentPage - 1) * itemsPerPage + 1;
+	const endItem = Math.min(currentPage * itemsPerPage, paginationData.totalCount);
+
+	// Check if any filters are active
+	const hasActiveFilters = (filters.categories && filters.categories.length > 0) ||
+		(filters.arrondissements && filters.arrondissements.length > 0) ||
+		(filters.types && filters.types.length > 0);
 	return (
 		<main className='flex-1 w-full max-w-6xl mx-auto px-4 xl:px-0 pt-8'>
-			<h1 className='mb-4 text-2xl text-left text-secondary'>
-				Rechercher un spot
-				{searchQuery && <span className='text-lg text-gray-600 ml-2'>- résultats pour "{searchQuery}"</span>}
-			</h1>
+			<div className='flex justify-between items-center'>
+				<h1 className='mb-4 text-2xl text-left text-secondary'>Rechercher un spot</h1>
+				{(searchQuery || hasActiveFilters) && (
+					<div className='text-sm text-gray-600'>
+						Affichage de {startItem} à {endItem} sur {paginationData.totalCount} spots
+						{searchQuery && (
+							<>
+								{' '}pour la recherche <span className='font-bold'>&quot;{searchQuery}&quot;</span>
+							</>
+						)}
+						{hasActiveFilters && (
+							<span className='text-blue-600'>
+								{searchQuery ? ' avec filtres appliqués' : ' avec filtres appliqués'}
+							</span>
+						)}
+					</div>
+				)}
+			</div>
 			<div className='flex gap-8'>
 				<div className='flex flex-col gap-4 w-[30%]'>
 					<SearchBar />
-					<Filter />
+					<Filter filterOptions={filterOptions} />
 				</div>
 				<div className='flex flex-col w-[70%]'>
 					<Suspense fallback={<CardsGridSkeleton />}>

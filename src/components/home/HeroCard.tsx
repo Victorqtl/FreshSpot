@@ -33,7 +33,7 @@ export default function HeroCard({ type }: Props) {
 				}`}></div>
 
 			<div
-				className={`relative flex flex-col justify-between w-[360px] lg:w-[320px] xl:w-[360px] h-[450px] bg-white border-2 border-zinc-200 rounded-3xl p-5 shadow-lg transition-all duration-700 ease-out ${
+				className={`relative flex flex-col justify-between w-[360px] lg:w-[320px] xl:w-[360px] h-[450px] bg-white border-2 border-zinc-200 rounded-2xl p-5 shadow-lg transition-all duration-700 ease-out ${
 					isVisible ? 'lg:translate-y-0 lg:opacity-100' : 'lg:translate-y-16 lg:opacity-0'
 				}`}>
 				<div>

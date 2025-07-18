@@ -48,8 +48,6 @@ export default function SpotsPagination({
 
 	if (totalPages <= 1) return null;
 
-	const itemsPerPage = 8;
-
 	// Get the visible pages (logic for ellipses)
 	const getVisiblePages = () => {
 		const delta = 2;
@@ -80,10 +78,6 @@ export default function SpotsPagination({
 
 	const visiblePages = getVisiblePages();
 
-	// Get the start and end item
-	const startItem = (currentPage - 1) * itemsPerPage + 1;
-	const endItem = Math.min(currentPage * itemsPerPage, totalCount);
-
 	// Handler for navigation
 	const handleNavigation = (url: string) => (e: React.MouseEvent) => {
 		e.preventDefault();
@@ -92,10 +86,6 @@ export default function SpotsPagination({
 
 	return (
 		<div className='flex flex-col items-center gap-4 mt-8'>
-			<div className='text-sm text-gray-600'>
-				Affichage de {startItem} à {endItem} sur {totalCount} spots
-			</div>
-
 			<Pagination>
 				<PaginationContent>
 					{/* Previous Button */}
