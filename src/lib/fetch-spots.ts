@@ -1,4 +1,5 @@
 import { Spot } from '@/types/spot';
+import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
 
 // Fetch all spots from the APIs and return a unique list of spots
 
@@ -52,8 +53,13 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 			fountainRes.json(),
 		]);
 
-		const activities: Spot[] = activitiesData.map(
-			(item: any): Spot => ({
+		// Type assertions après réception des données
+		const typedActivitiesData = activitiesData as ActivityData[];
+		const typedGreenSpacesData = greenSpacesData as GreenSpaceData[];
+		const typedFountainsData = fountainsData as FountainData[];
+
+		const activities: Spot[] = typedActivitiesData.map(
+			(item: ActivityData): Spot => ({
 				id: item.identifiant,
 				category: 'activities',
 				name: item.nom,
@@ -79,8 +85,8 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 			})
 		);
 
-		const greenSpaces: Spot[] = greenSpacesData.map(
-			(item: any): Spot => ({
+		const greenSpaces: Spot[] = typedGreenSpacesData.map(
+			(item: GreenSpaceData): Spot => ({
 				id: item.identifiant,
 				category: 'green_spaces',
 				name: item.nom,
@@ -109,8 +115,8 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 			})
 		);
 
-		const fountains: Spot[] = fountainsData.map(
-			(item: any): Spot => ({
+		const fountains: Spot[] = typedFountainsData.map(
+			(item: FountainData): Spot => ({
 				id: item.gid?.toString() || `fountain-${item.geo_point_2d?.lat}-${item.geo_point_2d?.lon}`,
 				category: 'water_fountains',
 				name: 'Fontaine à boire',

@@ -29,6 +29,20 @@ export default function SpotsPagination({
 }: SpotsPaginationProps) {
 	const router = useRouter();
 
+	// Helper function to create the URLs
+	const createPageUrl = (page: number) => {
+		return `/spots?page=${page}`;
+	};
+
+	// Memoize URLs to avoid recreating them - moved before conditional return
+	const urls = useMemo(
+		() => ({
+			previous: createPageUrl(currentPage - 1),
+			next: createPageUrl(currentPage + 1),
+		}),
+		[currentPage]
+	);
+
 	if (totalPages <= 1) return null;
 
 	const itemsPerPage = 8;
@@ -66,20 +80,6 @@ export default function SpotsPagination({
 	// Get the start and end item
 	const startItem = (currentPage - 1) * itemsPerPage + 1;
 	const endItem = Math.min(currentPage * itemsPerPage, totalCount);
-
-	// Helper function to create the URLs
-	const createPageUrl = (page: number) => {
-		return `/spots?page=${page}`;
-	};
-
-	// Memoize URLs to avoid recreating them
-	const urls = useMemo(
-		() => ({
-			previous: createPageUrl(currentPage - 1),
-			next: createPageUrl(currentPage + 1),
-		}),
-		[currentPage]
-	);
 
 	// Handler for navigation
 	const handleNavigation = (url: string) => (e: React.MouseEvent) => {

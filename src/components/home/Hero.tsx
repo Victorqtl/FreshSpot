@@ -17,14 +17,14 @@ export default function Hero() {
 						</Badge>
 						<h1 className='text-5xl lg:text-[5.5rem] text-center relative z-10 mt-2 leading-tight px-2'>
 							Respire un peu <br />
-							on t'emmène au{' '}
+							on t&apos;emmène au{' '}
 							<div className='inline-block bg-primary px-1 md:px-2 rotate-6 shadow-2xl shadow-zinc-900/40 hover:shadow-primary/40 transition-all duration-300'>
 								<span className='-rotate-6 inline-block text-white'>frais.</span>
 							</div>
 						</h1>
 						<p className='mt-6 md:mt-8 text-center text-sm sm:text-base md:text-lg lg:text-xl font-bold text-zinc-500 px-4 max-w-4xl'>
-							Freshspot t'aide à trouver rapidement un coin de fraîcheur à Paris. Fontaines, parcs, lieux
-							climatisés : tout est à portée de hand, quand tu en as le plus besoin.
+							Freshspot t&apos;aide à trouver rapidement un coin de fraîcheur à Paris. Fontaines, parcs,
+							lieux climatisés : tout est à portée de hand, quand tu en as le plus besoin.
 						</p>
 						<Button
 							variant='cta'
