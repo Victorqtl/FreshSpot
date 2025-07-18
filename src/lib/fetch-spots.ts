@@ -10,6 +10,12 @@ const GREEN_SPACES_URL =
 
 const FOUNTAINS_URL = 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/fontaines-a-boire/exports/json';
 
+// Cache setup for 2 hours
+let cachedSpots: Spot[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 2 * 60 * 60 * 1000;
+
+// Transform the district to the correct format
 function transformDistrict(value: string): string {
 	if (!value) return '';
 
@@ -23,17 +29,17 @@ function transformDistrict(value: string): string {
 }
 
 export async function fetchAllSpots(): Promise<Spot[]> {
+	// Check if the cache is valid
+	const now = Date.now();
+	if (cachedSpots && now - cacheTimestamp < CACHE_DURATION) {
+		return cachedSpots;
+	}
+
 	try {
 		const [activitiesRes, greenSpacesRes, fountainRes] = await Promise.all([
-			fetch(ACTIVITIES_URL, {
-				next: { revalidate: 21600 }, // 6h
-			}),
-			fetch(GREEN_SPACES_URL, {
-				next: { revalidate: 21600 }, // 6h
-			}),
-			fetch(FOUNTAINS_URL, {
-				next: { revalidate: 21600 }, // 6h
-			}),
+			fetch(ACTIVITIES_URL),
+			fetch(GREEN_SPACES_URL),
+			fetch(FOUNTAINS_URL),
 		]);
 
 		if (!activitiesRes.ok || !greenSpacesRes.ok || !fountainRes.ok) {
@@ -96,9 +102,9 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 					saturday: item.horaires_samedi,
 					sunday: item.horaires_dimanche,
 				},
-				is_24h_open: item.ouvert_24h === 'Oui',
-				is_heatwave_opening: item.canicule_ouverture === 'Oui',
-				is_night_summer_opening: item.ouverture_estivale_nocturne === 'Oui',
+				is_24h_open: item.ouvert_24h,
+				is_heatwave_opening: item.canicule_ouverture,
+				is_night_summer_opening: item.ouverture_estivale_nocturne,
 				category_label: item.categorie,
 			})
 		);
@@ -126,9 +132,55 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 
 		const uniqueSpots = validSpots.filter((spot, index, array) => array.findIndex(s => s.id === spot.id) === index);
 
+		// Cache the spots
+		cachedSpots = uniqueSpots;
+		cacheTimestamp = now;
+
 		return uniqueSpots;
 	} catch (error) {
 		console.error('Erreur fetch spots:', error);
 		return [];
 	}
+}
+
+export interface PaginatedSpotsResult {
+	spots: Spot[];
+	totalCount: number;
+	totalPages: number;
+	currentPage: number;
+	hasNextPage: boolean;
+	hasPreviousPage: boolean;
+}
+
+// Fetch spots with pagination - uses cache efficiently
+export async function fetchSpotsWithPagination(page: number = 1, limit: number = 8): Promise<PaginatedSpotsResult> {
+	const allSpots = await fetchAllSpots();
+
+	const totalCount = allSpots.length;
+	const totalPages = Math.ceil(totalCount / limit);
+	const startIndex = (page - 1) * limit;
+	const endIndex = startIndex + limit;
+
+	const spots = allSpots.slice(startIndex, endIndex);
+
+	return {
+		spots,
+		totalCount,
+		totalPages,
+		currentPage: page,
+		hasNextPage: page < totalPages,
+		hasPreviousPage: page > 1,
+	};
+}
+
+// Get total count
+export async function getTotalSpotsCount(): Promise<number> {
+	const allSpots = await fetchAllSpots();
+	return allSpots.length;
+}
+
+// Force cache refresh (useful for debugging or manual refresh)
+export function clearSpotsCache(): void {
+	cachedSpots = null;
+	cacheTimestamp = 0;
 }
