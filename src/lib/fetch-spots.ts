@@ -1,5 +1,6 @@
 import { Spot, PaginatedSpotsResult, SpotCategory } from '@/types/spot';
 import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
+import { SpotFilters } from '@/types/filters';
 import { searchSpots } from '@/lib/search';
 
 // Fetch all spots from the APIs and return a unique list of spots
@@ -150,28 +151,25 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 	}
 }
 
-// Filter interface
-export interface SpotFilters {
-	categories?: SpotCategory[];
-	arrondissements?: string[];
-	types?: string[];
-}
-
 // Get unique values for filters
 export async function getFilterOptions(): Promise<{
 	categories: { value: SpotCategory; label: string }[];
-	arrondissements: { value: string; label: string }[];
+	districts: { value: string; label: string }[];
 	types: { value: string; label: string; category: SpotCategory }[];
 }> {
 	const allSpots = await fetchAllSpots();
 
-	// Get unique arrondissements
-	const arrondissements = [...new Set(allSpots
-		.map(spot => spot.district)
-		.filter(district => district !== undefined && district !== null)
-		.map(district => district!.toString()))]
+	// Get unique districts
+	const districts = [
+		...new Set(
+			allSpots
+				.map(spot => spot.district)
+				.filter(district => district !== undefined && district !== null)
+				.map(district => district!.toString())
+		),
+	]
 		.sort((a, b) => {
-			// Sort Paris arrondissements first (750xx), then others
+			// Sort Paris districts first (750xx), then others
 			const aIsParis = a.startsWith('750');
 			const bIsParis = b.startsWith('750');
 			if (aIsParis && bIsParis) {
@@ -183,15 +181,15 @@ export async function getFilterOptions(): Promise<{
 		})
 		.map(district => ({
 			value: district,
-			label: district.startsWith('750') 
+			label: district.startsWith('750')
 				? `${parseInt(district.substring(3))}${district.substring(3) === '01' ? 'er' : 'e'} arrondissement`
-				: district
+				: district,
 		}));
 
 	// Get unique types by category
-	const types = [...new Set(allSpots
-		.filter(spot => spot.type)
-		.map(spot => ({ type: spot.type!, category: spot.category })))]
+	const types = [
+		...new Set(allSpots.filter(spot => spot.type).map(spot => ({ type: spot.type!, category: spot.category }))),
+	]
 		.reduce((acc, curr) => {
 			const existing = acc.find(item => item.type === curr.type && item.category === curr.category);
 			if (!existing) {
@@ -203,17 +201,17 @@ export async function getFilterOptions(): Promise<{
 		.map(item => ({
 			value: item.type,
 			label: item.type,
-			category: item.category
+			category: item.category,
 		}));
 
 	return {
 		categories: [
 			{ value: 'activities', label: 'Activités & Équipements' },
 			{ value: 'green_spaces', label: 'Espaces verts' },
-			{ value: 'water_fountains', label: 'Fontaines à boire' }
+			{ value: 'water_fountains', label: 'Fontaines à boire' },
 		],
-		arrondissements,
-		types
+		districts,
+		types,
 	};
 }
 
@@ -226,18 +224,14 @@ export function filterSpots(spots: Spot[], filters: SpotFilters): Spot[] {
 		filteredSpots = filteredSpots.filter(spot => filters.categories!.includes(spot.category));
 	}
 
-	// Filter by arrondissements
-	if (filters.arrondissements && filters.arrondissements.length > 0) {
-		filteredSpots = filteredSpots.filter(spot => 
-			filters.arrondissements!.includes(spot.district?.toString() || '')
-		);
+	// Filter by districts
+	if (filters.districts && filters.districts.length > 0) {
+		filteredSpots = filteredSpots.filter(spot => filters.districts!.includes(spot.district?.toString() || ''));
 	}
 
 	// Filter by types
 	if (filters.types && filters.types.length > 0) {
-		filteredSpots = filteredSpots.filter(spot => 
-			filters.types!.includes(spot.type || '')
-		);
+		filteredSpots = filteredSpots.filter(spot => filters.types!.includes(spot.type || ''));
 	}
 
 	return filteredSpots;

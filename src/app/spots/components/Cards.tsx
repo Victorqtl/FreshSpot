@@ -21,7 +21,7 @@ export default function Cards({
 }: CardsProps) {
 	return (
 		<div className='w-full flex flex-col'>
-			<div className='grid grid-cols-2 gap-4 w-full'>
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 w-full'>
 				{spots.map(spot => (
 					<Card
 						key={spot.id}

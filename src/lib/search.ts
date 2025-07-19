@@ -58,7 +58,7 @@ function generateSynonyms(query: string): string[] {
 /**
  * Extracts the district number from a search query
  */
-function extractArrondissementNumber(query: string): string | null {
+function extractDistrictNumber(query: string): string | null {
 	// Search for Parisian postal codes (750XX)
 	const postalMatch = query.match(/750(\d{2})/);
 	if (postalMatch) {
@@ -83,23 +83,23 @@ function extractArrondissementNumber(query: string): string | null {
 /**
  * Checks if a spot belongs to a given district
  */
-function isSpotInArrondissement(spot: Spot, arrondissementNumber: string): boolean {
+function isSpotInDistrict(spot: Spot, districtNumber: string): boolean {
 	const spotDistrict = normalizeString(String(spot.district || ''));
-	const paddedNumber = arrondissementNumber.padStart(2, '0');
+	const paddedNumber = districtNumber.padStart(2, '0');
 	const expectedCode = `750${paddedNumber}`;
 
 	return (
 		spotDistrict.includes(expectedCode) ||
-		spotDistrict.includes(`${arrondissementNumber}e arrondissement`) ||
-		spotDistrict.includes(`${arrondissementNumber}eme arrondissement`) ||
-		spotDistrict.includes(`${arrondissementNumber}ème arrondissement`)
+		spotDistrict.includes(`${districtNumber}e arrondissement`) ||
+		spotDistrict.includes(`${districtNumber}eme arrondissement`) ||
+		spotDistrict.includes(`${districtNumber}ème arrondissement`)
 	);
 }
 
 /**
  * Removes district terms from a list of keywords
  */
-function removeArrondissementKeywords(keywords: string[]): string[] {
+function removeDistrictKeywords(keywords: string[]): string[] {
 	return keywords.filter(
 		keyword =>
 			!keyword.includes('arrondissement') &&
@@ -124,10 +124,10 @@ export function searchSpots(spots: Spot[], searchQuery: string): Spot[] {
 	const keywords = normalizedQuery.split(' ').filter(k => k.length > 0);
 
 	// 1. Extract district number if it exists
-	const arrondissementNumber = extractArrondissementNumber(originalQuery);
+	const districtNumber = extractDistrictNumber(originalQuery);
 
 	// 2. Remove district terms from search keywords
-	const contentKeywords = arrondissementNumber ? removeArrondissementKeywords(keywords) : keywords;
+	const contentKeywords = districtNumber ? removeDistrictKeywords(keywords) : keywords;
 
 	return spots.filter(spot => {
 		// Create searchable text for the spot
@@ -148,8 +148,8 @@ export function searchSpots(spots: Spot[], searchQuery: string): Spot[] {
 		}
 
 		// 4. Filter by district (if specified)
-		if (arrondissementNumber) {
-			if (!isSpotInArrondissement(spot, arrondissementNumber)) {
+		if (districtNumber) {
+			if (!isSpotInDistrict(spot, districtNumber)) {
 				return false; // Spot is not in the right district
 			}
 		}
@@ -169,6 +169,6 @@ export function searchSpots(spots: Spot[], searchQuery: string): Spot[] {
 		}
 
 		// 6. If only a district is specified, return true (already filtered above)
-		return arrondissementNumber !== null;
+		return districtNumber !== null;
 	});
 }
