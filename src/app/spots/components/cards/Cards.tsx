@@ -1,6 +1,6 @@
 import { Spot } from '@/types/spot';
 import Card from './Card';
-import SpotsPagination from './SpotsPagination';
+import SpotsPagination from '../pagination/SpotsPagination';
 
 interface CardsProps {
 	spots: Spot[];

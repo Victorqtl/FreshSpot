@@ -7,17 +7,17 @@ import pool from '@/assets/pool.png';
 import fountain from '@/assets/fountain.png';
 import Link from 'next/link';
 
-// const categoryLabels = {
-// 	activities: 'Activités',
-// 	green_spaces: 'Espace vert',
-// 	water_fountains: 'Fontaine',
-// };
+const categoryLabels = {
+	activities: 'Activités',
+	green_spaces: 'Espace vert',
+	water_fountains: 'Fontaine',
+};
 
-// const categoryColors = {
-// 	activities: 'bg-blue-100 text-blue-800',
-// 	green_spaces: 'bg-green-100 text-green-800',
-// 	water_fountains: 'bg-cyan-100 text-cyan-800',
-// };
+const categoryColors = {
+	activities: 'bg-blue-100 text-blue-800',
+	green_spaces: 'bg-green-100 text-green-800',
+	water_fountains: 'bg-cyan-100 text-cyan-800',
+};
 
 export default function Card({ spot }: { spot: Spot }) {
 	return (
@@ -31,26 +31,23 @@ export default function Card({ spot }: { spot: Spot }) {
 						{spot.type && <p className='text-sm text-zinc-600'>{spot.type}</p>}
 					</div>
 					{spot.category === 'activities' ? (
-						<Image
-							src={pool}
-							alt='Piscine'
-							width={60}
-							height={60}
-						/>
+						<Badge
+							variant='spotCard'
+							className='bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700'>
+							{categoryLabels[spot.category]}
+						</Badge>
 					) : spot.category === 'green_spaces' ? (
-						<Image
-							src={park}
-							alt='Parc'
-							width={60}
-							height={60}
-						/>
+						<Badge
+							variant='spotCard'
+							className='bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700'>
+							{categoryLabels[spot.category]}
+						</Badge>
 					) : (
-						<Image
-							src={fountain}
-							alt='Fontaine'
-							width={60}
-							height={60}
-						/>
+						<Badge
+							variant='spotCard'
+							className='bg-cyan-50 text-cyan-600 hover:bg-cyan-100 hover:text-cyan-700'>
+							{categoryLabels[spot.category]}
+						</Badge>
 					)}
 				</div>
 

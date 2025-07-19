@@ -1,175 +1,95 @@
 import { Spot, PaginatedSpotsResult, SpotCategory } from '@/types/spot';
-import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
 import { SpotFilters } from '@/types/filters';
 import { searchSpots } from '@/lib/search';
+import { fetchAPIData } from './data-fetchers';
+import { transformAPIDataToSpots } from './data-transformers';
+import { 
+	cacheSpots, 
+	getCachedSpots, 
+	cacheFilterOptions, 
+	getCachedFilterOptions 
+} from './cache';
 
-// Fetch all spots from the APIs and return a unique list of spots
-
-const ACTIVITIES_URL =
-	'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-equipements-activites/exports/json';
-
-const GREEN_SPACES_URL =
-	'https://parisdata.opendatasoft.com/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-espaces-verts-frais/exports/json';
-
-const FOUNTAINS_URL = 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/fontaines-a-boire/exports/json';
-
-// Cache setup for 2 hours
-let cachedSpots: Spot[] | null = null;
-let cacheTimestamp: number = 0;
-const CACHE_DURATION = 2 * 60 * 60 * 1000;
-
-// Transform the district to the correct format
-function transformDistrict(value: string): string {
-	if (!value) return '';
-
-	const parisMatch = value.match(/^PARIS (\d+)(?:ER|EME) ARRONDISSEMENT$/i);
-	if (parisMatch) {
-		const district = parseInt(parisMatch[1]);
-		return `750${district.toString().padStart(2, '0')}`;
-	}
-
-	return value;
-}
-
+/**
+ * Fetch all spots from APIs with caching
+ */
 export async function fetchAllSpots(): Promise<Spot[]> {
-	// Check if the cache is valid
-	const now = Date.now();
-	if (cachedSpots && now - cacheTimestamp < CACHE_DURATION) {
+	// Try to get from cache first
+	const cachedSpots = getCachedSpots();
+	if (cachedSpots) {
 		return cachedSpots;
 	}
 
 	try {
-		const [activitiesRes, greenSpacesRes, fountainRes] = await Promise.all([
-			fetch(ACTIVITIES_URL),
-			fetch(GREEN_SPACES_URL),
-			fetch(FOUNTAINS_URL),
-		]);
-
-		if (!activitiesRes.ok || !greenSpacesRes.ok || !fountainRes.ok) {
-			throw new Error('Erreur lors du fetch des données');
-		}
-
-		const [activitiesData, greenSpacesData, fountainsData] = await Promise.all([
-			activitiesRes.json(),
-			greenSpacesRes.json(),
-			fountainRes.json(),
-		]);
-
-		// Type assertions après réception des données
-		const typedActivitiesData = activitiesData as ActivityData[];
-		const typedGreenSpacesData = greenSpacesData as GreenSpaceData[];
-		const typedFountainsData = fountainsData as FountainData[];
-
-		const activities: Spot[] = typedActivitiesData.map(
-			(item: ActivityData): Spot => ({
-				id: item.identifiant,
-				category: 'activities',
-				name: item.nom,
-				type: item.type,
-				address: item.adresse,
-				district: item.arrondissement,
-				geo: {
-					lat: item.geo_point_2d?.lat ?? 0,
-					lon: item.geo_point_2d?.lon ?? 0,
-				},
-				schedule: {
-					period: item.horaires_periode,
-					open_status: item.statut_ouverture,
-					monday: item.horaires_lundi,
-					tuesday: item.horaires_mardi,
-					wednesday: item.horaires_mercredi,
-					thursday: item.horaires_jeudi,
-					friday: item.horaires_vendredi,
-					saturday: item.horaires_samedi,
-					sunday: item.horaires_dimanche,
-				},
-				is_paid: item.payant,
-			})
-		);
-
-		const greenSpaces: Spot[] = typedGreenSpacesData.map(
-			(item: GreenSpaceData): Spot => ({
-				id: item.identifiant,
-				category: 'green_spaces',
-				name: item.nom,
-				type: item.type,
-				address: item.adresse,
-				district: item.arrondissement,
-				geo: {
-					lat: item.geo_point_2d?.lat ?? 0,
-					lon: item.geo_point_2d?.lon ?? 0,
-				},
-				schedule: {
-					period: item.horaires_periode,
-					open_status: item.statut_ouverture,
-					monday: item.horaires_lundi,
-					tuesday: item.horaires_mardi,
-					wednesday: item.horaires_mercredi,
-					thursday: item.horaires_jeudi,
-					friday: item.horaires_vendredi,
-					saturday: item.horaires_samedi,
-					sunday: item.horaires_dimanche,
-				},
-				is_24h_open: item.ouvert_24h,
-				is_heatwave_opening: item.canicule_ouverture,
-				is_night_summer_opening: item.ouverture_estivale_nocturne,
-				category_label: item.categorie,
-			})
-		);
-
-		const fountains: Spot[] = typedFountainsData.map(
-			(item: FountainData): Spot => ({
-				id: item.gid?.toString() || `fountain-${item.geo_point_2d?.lat}-${item.geo_point_2d?.lon}`,
-				category: 'water_fountains',
-				name: 'Fontaine à boire',
-				address: item.voie,
-				district: transformDistrict(item.commune),
-				city: transformDistrict(item.commune),
-				geo: {
-					lat: item.geo_point_2d?.lat ?? 0,
-					lon: item.geo_point_2d?.lon ?? 0,
-				},
-				model: item.modele,
-				is_available: item.dispo,
-			})
-		);
-
-		const allSpots = [...activities, ...greenSpaces, ...fountains];
-
-		const validSpots = allSpots.filter(spot => spot.geo.lat !== 0 || spot.geo.lon !== 0);
-
-		const uniqueSpots = validSpots.filter((spot, index, array) => array.findIndex(s => s.id === spot.id) === index);
-
-		// Cache the spots
-		cachedSpots = uniqueSpots;
-		cacheTimestamp = now;
-
-		return uniqueSpots;
+		// Fetch fresh data from APIs
+		const apiData = await fetchAPIData();
+		
+		// Transform to unified format
+		const spots = transformAPIDataToSpots(apiData);
+		
+		// Cache the results
+		cacheSpots(spots);
+		
+		return spots;
 	} catch (error) {
 		console.error('Erreur fetch spots:', error);
 		return [];
 	}
 }
 
-// Get unique values for filters
+/**
+ * Generate filter options from spots data
+ */
 export async function getFilterOptions(): Promise<{
 	categories: { value: SpotCategory; label: string }[];
 	districts: { value: string; label: string }[];
 	types: { value: string; label: string; category: SpotCategory }[];
 }> {
+	// Try to get from cache first
+	const cachedOptions = getCachedFilterOptions();
+	if (cachedOptions) {
+		return cachedOptions;
+	}
+
 	const allSpots = await fetchAllSpots();
 
-	// Get unique districts
-	const districts = [
+	// Extract unique districts
+	const districts = extractUniqueDistricts(allSpots);
+	
+	// Extract unique types by category
+	const types = extractUniqueTypes(allSpots);
+
+	const result = {
+		categories: [
+			{ value: 'activities' as SpotCategory, label: 'Activités & Équipements' },
+			{ value: 'green_spaces' as SpotCategory, label: 'Espaces verts' },
+			{ value: 'water_fountains' as SpotCategory, label: 'Fontaines à boire' },
+		],
+		districts,
+		types,
+	};
+
+	// Cache the results
+	cacheFilterOptions(result);
+
+	return result;
+}
+
+/**
+ * Extract unique districts with proper sorting and labeling
+ */
+function extractUniqueDistricts(spots: Spot[]): { value: string; label: string }[] {
+	const uniqueDistricts = [
 		...new Set(
-			allSpots
+			spots
 				.map(spot => spot.district)
 				.filter(district => district !== undefined && district !== null)
 				.map(district => district!.toString())
 		),
-	]
+	];
+
+	return uniqueDistricts
 		.sort((a, b) => {
-			// Sort Paris districts first (750xx), then others
 			const aIsParis = a.startsWith('750');
 			const bIsParis = b.startsWith('750');
 			if (aIsParis && bIsParis) {
@@ -185,79 +105,77 @@ export async function getFilterOptions(): Promise<{
 				? `${parseInt(district.substring(3))}${district.substring(3) === '01' ? 'er' : 'e'} arrondissement`
 				: district,
 		}));
+}
 
-	// Get unique types by category
-	const types = [
-		...new Set(allSpots.filter(spot => spot.type).map(spot => ({ type: spot.type!, category: spot.category }))),
-	]
-		.reduce((acc, curr) => {
-			const existing = acc.find(item => item.type === curr.type && item.category === curr.category);
-			if (!existing) {
-				acc.push(curr);
+/**
+ * Extract unique types by category
+ */
+function extractUniqueTypes(spots: Spot[]): { value: string; label: string; category: SpotCategory }[] {
+	const typeMap = new Map<string, { type: string; category: SpotCategory }>();
+	
+	spots
+		.filter(spot => spot.type)
+		.forEach(spot => {
+			const key = `${spot.type}-${spot.category}`;
+			if (!typeMap.has(key)) {
+				typeMap.set(key, { type: spot.type!, category: spot.category });
 			}
-			return acc;
-		}, [] as { type: string; category: SpotCategory }[])
+		});
+
+	return Array.from(typeMap.values())
 		.sort((a, b) => a.type.localeCompare(b.type))
 		.map(item => ({
 			value: item.type,
 			label: item.type,
 			category: item.category,
 		}));
-
-	return {
-		categories: [
-			{ value: 'activities', label: 'Activités & Équipements' },
-			{ value: 'green_spaces', label: 'Espaces verts' },
-			{ value: 'water_fountains', label: 'Fontaines à boire' },
-		],
-		districts,
-		types,
-	};
 }
 
-// Filter spots based on provided filters
+/**
+ * Apply filters to spots array
+ */
 export function filterSpots(spots: Spot[], filters: SpotFilters): Spot[] {
-	let filteredSpots = spots;
+	return spots.filter(spot => {
+		// Category filter
+		if (filters.categories?.length && !filters.categories.includes(spot.category)) {
+			return false;
+		}
 
-	// Filter by categories
-	if (filters.categories && filters.categories.length > 0) {
-		filteredSpots = filteredSpots.filter(spot => filters.categories!.includes(spot.category));
-	}
+		// District filter
+		if (filters.districts?.length && !filters.districts.includes(spot.district?.toString() || '')) {
+			return false;
+		}
 
-	// Filter by districts
-	if (filters.districts && filters.districts.length > 0) {
-		filteredSpots = filteredSpots.filter(spot => filters.districts!.includes(spot.district?.toString() || ''));
-	}
+		// Type filter
+		if (filters.types?.length && !filters.types.includes(spot.type || '')) {
+			return false;
+		}
 
-	// Filter by types
-	if (filters.types && filters.types.length > 0) {
-		filteredSpots = filteredSpots.filter(spot => filters.types!.includes(spot.type || ''));
-	}
-
-	return filteredSpots;
+		return true;
+	});
 }
 
-// Fetch spots with pagination, search, and filters - uses cache efficiently
+/**
+ * Main function: fetch spots with pagination, search, and filters
+ */
 export async function fetchSpotsWithPaginationAndSearch(
 	page: number = 1,
 	limit: number = 8,
 	searchQuery?: string,
 	filters?: SpotFilters
 ): Promise<PaginatedSpotsResult> {
+	// Get all spots (from cache if available)
 	const allSpots = await fetchAllSpots();
 
-	// Apply filters first
+	// Apply filters and search
 	let filteredSpots = filters ? filterSpots(allSpots, filters) : allSpots;
-
-	// Apply search filter if provided
 	filteredSpots = searchQuery ? searchSpots(filteredSpots, searchQuery) : filteredSpots;
 
+	// Calculate pagination
 	const totalCount = filteredSpots.length;
 	const totalPages = Math.ceil(totalCount / limit);
 	const startIndex = (page - 1) * limit;
-	const endIndex = startIndex + limit;
-
-	const spots = filteredSpots.slice(startIndex, endIndex);
+	const spots = filteredSpots.slice(startIndex, startIndex + limit);
 
 	return {
 		spots,
