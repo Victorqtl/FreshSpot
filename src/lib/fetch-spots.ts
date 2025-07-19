@@ -3,12 +3,7 @@ import { SpotFilters } from '@/types/filters';
 import { searchSpots } from '@/lib/search';
 import { fetchAPIData } from './data-fetchers';
 import { transformAPIDataToSpots } from './data-transformers';
-import { 
-	cacheSpots, 
-	getCachedSpots, 
-	cacheFilterOptions, 
-	getCachedFilterOptions 
-} from './cache';
+import { cacheSpots, getCachedSpots, cacheFilterOptions, getCachedFilterOptions } from './cache';
 
 /**
  * Fetch all spots from APIs with caching
@@ -23,13 +18,13 @@ export async function fetchAllSpots(): Promise<Spot[]> {
 	try {
 		// Fetch fresh data from APIs
 		const apiData = await fetchAPIData();
-		
+
 		// Transform to unified format
 		const spots = transformAPIDataToSpots(apiData);
-		
+
 		// Cache the results
 		cacheSpots(spots);
-		
+
 		return spots;
 	} catch (error) {
 		console.error('Erreur fetch spots:', error);
@@ -44,6 +39,7 @@ export async function getFilterOptions(): Promise<{
 	categories: { value: SpotCategory; label: string }[];
 	districts: { value: string; label: string }[];
 	types: { value: string; label: string; category: SpotCategory }[];
+	paid: { value: string; label: string }[];
 }> {
 	// Try to get from cache first
 	const cachedOptions = getCachedFilterOptions();
@@ -55,7 +51,7 @@ export async function getFilterOptions(): Promise<{
 
 	// Extract unique districts
 	const districts = extractUniqueDistricts(allSpots);
-	
+
 	// Extract unique types by category
 	const types = extractUniqueTypes(allSpots);
 
@@ -67,6 +63,10 @@ export async function getFilterOptions(): Promise<{
 		],
 		districts,
 		types,
+		paid: [
+			{ value: 'gratuit', label: 'Gratuit' },
+			{ value: 'payant', label: 'Payant' },
+		],
 	};
 
 	// Cache the results
@@ -112,7 +112,7 @@ function extractUniqueDistricts(spots: Spot[]): { value: string; label: string }
  */
 function extractUniqueTypes(spots: Spot[]): { value: string; label: string; category: SpotCategory }[] {
 	const typeMap = new Map<string, { type: string; category: SpotCategory }>();
-	
+
 	spots
 		.filter(spot => spot.type)
 		.forEach(spot => {
@@ -149,6 +149,17 @@ export function filterSpots(spots: Spot[], filters: SpotFilters): Spot[] {
 		// Type filter
 		if (filters.types?.length && !filters.types.includes(spot.type || '')) {
 			return false;
+		}
+
+		// Paid filter
+		if (filters.paid) {
+			const isPaid = spot.is_paid === 'Oui';
+			if (filters.paid === 'payant' && !isPaid) {
+				return false;
+			}
+			if (filters.paid === 'gratuit' && isPaid) {
+				return false;
+			}
 		}
 
 		return true;

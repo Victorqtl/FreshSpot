@@ -11,6 +11,7 @@ interface SpotsPageProps {
 		categories?: string;
 		districts?: string;
 		types?: string;
+		paid?: string;
 	}>;
 }
 

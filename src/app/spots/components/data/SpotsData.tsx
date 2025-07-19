@@ -10,6 +10,7 @@ interface SpotsDataProps {
 		categories?: string;
 		districts?: string;
 		types?: string;
+		paid?: string;
 	};
 }
 
@@ -23,6 +24,7 @@ export default async function SpotsData({ searchParams }: SpotsDataProps) {
 		categories: (searchParams.categories?.split(',').filter(Boolean) as SpotCategory[]) || undefined,
 		districts: searchParams.districts?.split(',').filter(Boolean) || undefined,
 		types: searchParams.types?.split(',').filter(Boolean) || undefined,
+		paid: searchParams.paid || undefined,
 	};
 
 	// Get pagination data
@@ -35,7 +37,8 @@ export default async function SpotsData({ searchParams }: SpotsDataProps) {
 	const hasActiveFilters =
 		(filters.categories && filters.categories.length > 0) ||
 		(filters.districts && filters.districts.length > 0) ||
-		(filters.types && filters.types.length > 0);
+		(filters.types && filters.types.length > 0) ||
+		(filters.paid && filters.paid !== '');
 
 	return (
 		<div className='flex flex-col w-full lg:w-[70%]'>

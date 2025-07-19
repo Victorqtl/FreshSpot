@@ -61,6 +61,12 @@ export function SearchBar() {
 				<button
 					onClick={() => {
 						setSearchValue('');
+						// Remove search from URL immediately
+						const params = new URLSearchParams(searchParams.toString());
+						params.delete('search');
+						params.delete('page');
+						const newUrl = `/spots${params.toString() ? `?${params.toString()}` : ''}`;
+						router.push(newUrl);
 					}}
 					className='absolute right-12 top-1/2 -translate-y-1/2 z-50 cursor-pointer'>
 					<X className='size-5 text-secondary' />

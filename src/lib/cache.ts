@@ -13,6 +13,7 @@ interface FilterOptions {
 	categories: { value: SpotCategory; label: string }[];
 	districts: { value: string; label: string }[];
 	types: { value: string; label: string; category: SpotCategory }[];
+	paid: { value: string; label: string }[];
 }
 
 // Cache storage

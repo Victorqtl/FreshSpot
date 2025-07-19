@@ -23,7 +23,7 @@ export default function Card({ spot }: { spot: Spot }) {
 	return (
 		<Link
 			href={`/spot/${spot.id}`}
-			className='h-56 border-2 border-zinc-200 rounded-2xl p-4 shadow-md hover:shadow-lg transition-shadow'>
+			className='h-60 border-2 border-zinc-200 rounded-2xl p-4 shadow-md hover:shadow-lg transition-shadow'>
 			<div className='flex flex-col gap-3 h-full'>
 				<div className='flex items-center justify-between gap-2'>
 					<div className='flex flex-col gap-2'>
@@ -31,23 +31,26 @@ export default function Card({ spot }: { spot: Spot }) {
 						{spot.type && <p className='text-sm text-zinc-600'>{spot.type}</p>}
 					</div>
 					{spot.category === 'activities' ? (
-						<Badge
-							variant='spotCard'
-							className='bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700'>
-							{categoryLabels[spot.category]}
-						</Badge>
+						<Image
+							src={pool}
+							alt='Piscine'
+							width={60}
+							height={60}
+						/>
 					) : spot.category === 'green_spaces' ? (
-						<Badge
-							variant='spotCard'
-							className='bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700'>
-							{categoryLabels[spot.category]}
-						</Badge>
+						<Image
+							src={park}
+							alt='Parc'
+							width={60}
+							height={60}
+						/>
 					) : (
-						<Badge
-							variant='spotCard'
-							className='bg-cyan-50 text-cyan-600 hover:bg-cyan-100 hover:text-cyan-700'>
-							{categoryLabels[spot.category]}
-						</Badge>
+						<Image
+							src={fountain}
+							alt='Fontaine'
+							width={60}
+							height={60}
+						/>
 					)}
 				</div>
 

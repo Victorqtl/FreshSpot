@@ -19,6 +19,7 @@ interface FilterProps {
 		categories: { value: SpotCategory; label: string }[];
 		districts: { value: string; label: string }[];
 		types: { value: string; label: string; category: SpotCategory }[];
+		paid: { value: string; label: string }[];
 	};
 }
 
@@ -29,20 +30,23 @@ export default function Filter({ filterOptions }: FilterProps) {
 	const [selectedCategories, setSelectedCategories] = useState<SpotCategory[]>([]);
 	const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
 	const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+	const [selectedPaid, setSelectedPaid] = useState<string>('');
 
 	// Initialize filters from URL params
 	useEffect(() => {
 		const categoriesFromUrl = (searchParams.get('categories')?.split(',').filter(Boolean) as SpotCategory[]) || [];
 		const districtsFromUrl = searchParams.get('districts')?.split(',').filter(Boolean) || [];
 		const typesFromUrl = searchParams.get('types')?.split(',').filter(Boolean) || [];
+		const paidFromUrl = searchParams.get('paid') || '';
 
 		setSelectedCategories(categoriesFromUrl);
 		setSelectedDistricts(districtsFromUrl);
 		setSelectedTypes(typesFromUrl);
+		setSelectedPaid(paidFromUrl);
 	}, [searchParams]);
 
 	// Update URL when filters change
-	const updateUrl = (newCategories: SpotCategory[], newDistricts: string[], newTypes: string[]) => {
+	const updateUrl = (newCategories: SpotCategory[], newDistricts: string[], newTypes: string[], newPaid: string = selectedPaid) => {
 		const params = new URLSearchParams(searchParams.toString());
 
 		// Update categories
@@ -64,6 +68,13 @@ export default function Filter({ filterOptions }: FilterProps) {
 			params.set('types', newTypes.join(','));
 		} else {
 			params.delete('types');
+		}
+
+		// Update paid filter
+		if (newPaid) {
+			params.set('paid', newPaid);
+		} else {
+			params.delete('paid');
 		}
 
 		// Reset to page 1 when filters change
@@ -107,7 +118,13 @@ export default function Filter({ filterOptions }: FilterProps) {
 		updateUrl(selectedCategories, selectedDistricts, newTypes);
 	};
 
-	const removeFilter = (type: 'category' | 'district' | 'type', value: string) => {
+	const handlePaidChange = (paidValue: string, checked: boolean) => {
+		const newPaid = checked ? paidValue : '';
+		setSelectedPaid(newPaid);
+		updateUrl(selectedCategories, selectedDistricts, selectedTypes, newPaid);
+	};
+
+	const removeFilter = (type: 'category' | 'district' | 'type' | 'paid', value: string) => {
 		if (type === 'category') {
 			const newCategories = selectedCategories.filter(c => c !== value);
 			// Remove types that belong to the removed category
@@ -126,6 +143,9 @@ export default function Filter({ filterOptions }: FilterProps) {
 			const newTypes = selectedTypes.filter(t => t !== value);
 			setSelectedTypes(newTypes);
 			updateUrl(selectedCategories, selectedDistricts, newTypes);
+		} else if (type === 'paid') {
+			setSelectedPaid('');
+			updateUrl(selectedCategories, selectedDistricts, selectedTypes, '');
 		}
 	};
 
@@ -133,7 +153,8 @@ export default function Filter({ filterOptions }: FilterProps) {
 		setSelectedCategories([]);
 		setSelectedDistricts([]);
 		setSelectedTypes([]);
-		updateUrl([], [], []);
+		setSelectedPaid('');
+		updateUrl([], [], [], '');
 	};
 
 	// Get available types based on selected categories
@@ -144,7 +165,7 @@ export default function Filter({ filterOptions }: FilterProps) {
 		return filterOptions.types.filter(type => selectedCategories.includes(type.category));
 	};
 
-	const hasActiveFilters = selectedCategories.length > 0 || selectedDistricts.length > 0 || selectedTypes.length > 0;
+	const hasActiveFilters = selectedCategories.length > 0 || selectedDistricts.length > 0 || selectedTypes.length > 0 || selectedPaid !== '';
 
 	return (
 		<div className='flex flex-col gap-4 border-2 border-zinc-200 rounded-md p-4'>
@@ -280,6 +301,43 @@ export default function Filter({ filterOptions }: FilterProps) {
 					)}
 				</div>
 
+				{/* Paid Filter */}
+				<div className='flex flex-col gap-2'>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant='outline'
+								className='w-fit justify-start'>
+								Tarification{' '}
+								{selectedPaid && (
+									<span className='ml-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full'>
+										1
+									</span>
+								)}
+								<ChevronDown
+									strokeWidth={2}
+									className='size-4 ml-2'
+								/>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							className='w-56'
+							side='bottom'
+							align='start'
+							sideOffset={6}>
+							{filterOptions.paid.map(paidOption => (
+								<DropdownMenuCheckboxItem
+									key={paidOption.value}
+									checked={selectedPaid === paidOption.value}
+									onCheckedChange={checked => handlePaidChange(paidOption.value, checked)}
+									onSelect={e => e.preventDefault()}>
+									{paidOption.label}
+								</DropdownMenuCheckboxItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+
 				{/* Active Filters Display */}
 				{hasActiveFilters && (
 					<div className='flex flex-col gap-2'>
@@ -333,6 +391,18 @@ export default function Filter({ filterOptions }: FilterProps) {
 									</Badge>
 								);
 							})}
+							{selectedPaid && (
+								<Badge
+									variant='outline'
+									className='flex items-center gap-1'>
+									{filterOptions.paid.find(p => p.value === selectedPaid)?.label}
+									<button
+										onClick={() => removeFilter('paid', selectedPaid)}
+										className='cursor-pointer'>
+										<X size={14} />
+									</button>
+								</Badge>
+							)}
 						</div>
 					</div>
 				)}

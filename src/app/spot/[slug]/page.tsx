@@ -1,3 +1,3 @@
-export default function Spot() {
-	return <div>Spot</div>;
+export default function Spot({ params }: { params: { slug: string } }) {
+	return <div></div>;
 }
