@@ -1,10 +1,29 @@
 import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
 
-// API URLs configuration
+// API URLs and Dataset IDs configuration
+export const API_CONFIG = {
+	ACTIVITIES: {
+		url: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-equipements-activites/exports/json',
+		dataset_id: 'ilots-de-fraicheur-equipements-activites',
+		base_url: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets',
+	},
+	GREEN_SPACES: {
+		url: 'https://parisdata.opendatasoft.com/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-espaces-verts-frais/exports/json',
+		dataset_id: 'ilots-de-fraicheur-espaces-verts-frais',
+		base_url: 'https://parisdata.opendatasoft.com/api/explore/v2.1/catalog/datasets',
+	},
+	FOUNTAINS: {
+		url: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/fontaines-a-boire/exports/json',
+		dataset_id: 'fontaines-a-boire',
+		base_url: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets',
+	},
+} as const;
+
+// Legacy API_URLS for backward compatibility
 export const API_URLS = {
-	ACTIVITIES: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-equipements-activites/exports/json',
-	GREEN_SPACES: 'https://parisdata.opendatasoft.com/api/explore/v2.1/catalog/datasets/ilots-de-fraicheur-espaces-verts-frais/exports/json',
-	FOUNTAINS: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/fontaines-a-boire/exports/json',
+	ACTIVITIES: API_CONFIG.ACTIVITIES.url,
+	GREEN_SPACES: API_CONFIG.GREEN_SPACES.url,
+	FOUNTAINS: API_CONFIG.FOUNTAINS.url,
 } as const;
 
 /**
@@ -43,3 +62,4 @@ export async function fetchAPIData(): Promise<{
 		throw error;
 	}
 }
+

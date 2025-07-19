@@ -197,3 +197,4 @@ export async function fetchSpotsWithPaginationAndSearch(
 		hasPreviousPage: page > 1,
 	};
 }
+

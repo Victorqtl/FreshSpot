@@ -6,6 +6,7 @@ import park from '@/assets/park.png';
 import pool from '@/assets/pool.png';
 import fountain from '@/assets/fountain.png';
 import Link from 'next/link';
+import { getDatasetIdFromCategory } from '@/lib/fetch-spot-by-id';
 
 const categoryLabels = {
 	activities: 'Activités',
@@ -20,9 +21,13 @@ const categoryColors = {
 };
 
 export default function Card({ spot }: { spot: Spot }) {
+	const datasetId = getDatasetIdFromCategory(spot.category);
+	const spotUrl = `/spot/${datasetId}/${spot.id}`;
+
+
 	return (
 		<Link
-			href={`/spot/${spot.id}`}
+			href={spotUrl}
 			className='h-60 border-2 border-zinc-200 rounded-2xl p-4 shadow-md hover:shadow-lg transition-shadow'>
 			<div className='flex flex-col gap-3 h-full'>
 				<div className='flex items-center justify-between gap-2'>
