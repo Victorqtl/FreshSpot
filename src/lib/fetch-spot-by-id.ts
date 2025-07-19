@@ -7,7 +7,10 @@ import { API_CONFIG } from './data-fetchers';
  * Get dataset config by dataset ID
  */
 function getDatasetConfig(datasetId: string) {
-	const configs = {
+	const configs: Record<
+		string,
+		typeof API_CONFIG.ACTIVITIES | typeof API_CONFIG.GREEN_SPACES | typeof API_CONFIG.FOUNTAINS
+	> = {
 		[API_CONFIG.ACTIVITIES.dataset_id]: API_CONFIG.ACTIVITIES,
 		[API_CONFIG.GREEN_SPACES.dataset_id]: API_CONFIG.GREEN_SPACES,
 		[API_CONFIG.FOUNTAINS.dataset_id]: API_CONFIG.FOUNTAINS,
@@ -38,7 +41,6 @@ export async function fetchSpotByDatasetAndId(datasetId: string, recordId: strin
 
 		const data = await response.json();
 
-		// Vérifier si on a des résultats
 		if (!data.results || data.results.length === 0) {
 			return null;
 		}

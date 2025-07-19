@@ -18,7 +18,7 @@ export default function NotFound() {
 						<h2 className='text-2xl font-semibold text-gray-700'>Page introuvable</h2>
 					</div>
 					<p className='text-lg text-gray-600 max-w-md mx-auto'>
-						La page que vous recherchez n'existe pas ou a été déplacée.
+						La page que vous recherchez n&apos;existe pas ou a été déplacée.
 					</p>
 				</div>
 
@@ -26,7 +26,7 @@ export default function NotFound() {
 					<Link href='/'>
 						<Button className='flex items-center gap-2'>
 							<Home className='size-4' />
-							Retour à l'accueil
+							Retour à l&apos;accueil
 						</Button>
 					</Link>
 					<Link href='/spots'>

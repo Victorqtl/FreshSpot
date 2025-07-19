@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
 	Pagination,
 	PaginationContent,
@@ -23,28 +23,24 @@ interface SpotsPaginationProps {
 export default function SpotsPagination({
 	currentPage,
 	totalPages,
-	totalCount,
 	hasNextPage,
 	hasPreviousPage,
 }: SpotsPaginationProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	// Helper function to create the URLs with preserved search params
-	const createPageUrl = (page: number) => {
+	// Helper function to create URLs with preserved search params
+	const createPageUrl = useCallback((page: number) => {
 		const params = new URLSearchParams(searchParams.toString());
 		params.set('page', page.toString());
 		return `/spots?${params.toString()}`;
-	};
+	}, [searchParams]);
 
 	// Memoize URLs to avoid recreating them - moved before conditional return
-	const urls = useMemo(
-		() => ({
-			previous: createPageUrl(currentPage - 1),
-			next: createPageUrl(currentPage + 1),
-		}),
-		[currentPage, searchParams]
-	);
+	const urls = useMemo(() => ({
+		previous: createPageUrl(currentPage - 1),
+		next: createPageUrl(currentPage + 1),
+	}), [createPageUrl, currentPage]);
 
 	if (totalPages <= 1) return null;
 

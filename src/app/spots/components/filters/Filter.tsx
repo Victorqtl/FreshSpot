@@ -46,7 +46,12 @@ export default function Filter({ filterOptions }: FilterProps) {
 	}, [searchParams]);
 
 	// Update URL when filters change
-	const updateUrl = (newCategories: SpotCategory[], newDistricts: string[], newTypes: string[], newPaid: string = selectedPaid) => {
+	const updateUrl = (
+		newCategories: SpotCategory[],
+		newDistricts: string[],
+		newTypes: string[],
+		newPaid: string = selectedPaid
+	) => {
 		const params = new URLSearchParams(searchParams.toString());
 
 		// Update categories
@@ -165,7 +170,11 @@ export default function Filter({ filterOptions }: FilterProps) {
 		return filterOptions.types.filter(type => selectedCategories.includes(type.category));
 	};
 
-	const hasActiveFilters = selectedCategories.length > 0 || selectedDistricts.length > 0 || selectedTypes.length > 0 || selectedPaid !== '';
+	const hasActiveFilters =
+		selectedCategories.length > 0 ||
+		selectedDistricts.length > 0 ||
+		selectedTypes.length > 0 ||
+		selectedPaid !== '';
 
 	return (
 		<div className='flex flex-col gap-4 border-2 border-zinc-200 rounded-md p-4'>
@@ -220,6 +229,50 @@ export default function Filter({ filterOptions }: FilterProps) {
 					</DropdownMenu>
 				</div>
 
+				{/* Types Filter */}
+				<div className='flex flex-col gap-2'>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant='outline'
+								className='w-fit justify-start'
+								disabled={
+									selectedCategories.length === 0 ||
+									(selectedCategories.length === 1 && selectedCategories.includes('water_fountains'))
+								}>
+								Types de lieu{' '}
+								{selectedTypes.length > 0 && (
+									<span className='ml-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full'>
+										{selectedTypes.length}
+									</span>
+								)}
+								<ChevronDown
+									strokeWidth={2}
+									className='size-4 ml-2'
+								/>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							className='w-56 max-h-64 overflow-y-auto'
+							side='bottom'
+							align='start'
+							sideOffset={6}>
+							{getAvailableTypes().map(type => (
+								<DropdownMenuCheckboxItem
+									key={type.value}
+									checked={selectedTypes.includes(type.value)}
+									onCheckedChange={checked => handleTypeChange(type.value, checked)}
+									onSelect={e => e.preventDefault()}>
+									{type.label}
+								</DropdownMenuCheckboxItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+					{selectedCategories.length === 0 && (
+						<p className='text-xs text-gray-500'>Sélectionnez d&apos;abord une catégorie</p>
+					)}
+				</div>
+
 				{/* Arrondissements Filter */}
 				<div className='flex flex-col gap-2'>
 					<DropdownMenu>
@@ -255,50 +308,6 @@ export default function Filter({ filterOptions }: FilterProps) {
 							))}
 						</DropdownMenuContent>
 					</DropdownMenu>
-				</div>
-
-				{/* Types Filter */}
-				<div className='flex flex-col gap-2'>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant='outline'
-								className='w-fit justify-start'
-								disabled={
-									selectedCategories.length === 0 || 
-									(selectedCategories.length === 1 && selectedCategories.includes('water_fountains'))
-								}>
-								Types de lieu{' '}
-								{selectedTypes.length > 0 && (
-									<span className='ml-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full'>
-										{selectedTypes.length}
-									</span>
-								)}
-								<ChevronDown
-									strokeWidth={2}
-									className='size-4 ml-2'
-								/>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							className='w-56 max-h-64 overflow-y-auto'
-							side='bottom'
-							align='start'
-							sideOffset={6}>
-							{getAvailableTypes().map(type => (
-								<DropdownMenuCheckboxItem
-									key={type.value}
-									checked={selectedTypes.includes(type.value)}
-									onCheckedChange={checked => handleTypeChange(type.value, checked)}
-									onSelect={e => e.preventDefault()}>
-									{type.label}
-								</DropdownMenuCheckboxItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
-					{selectedCategories.length === 0 && (
-						<p className='text-xs text-gray-500'>Sélectionnez d&apos;abord une catégorie</p>
-					)}
 				</div>
 
 				{/* Paid Filter */}

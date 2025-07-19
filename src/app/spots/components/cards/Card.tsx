@@ -8,17 +8,6 @@ import fountain from '@/assets/fountain.png';
 import Link from 'next/link';
 import { getDatasetIdFromCategory } from '@/lib/fetch-spot-by-id';
 
-const categoryLabels = {
-	activities: 'Activités',
-	green_spaces: 'Espace vert',
-	water_fountains: 'Fontaine',
-};
-
-const categoryColors = {
-	activities: 'bg-blue-100 text-blue-800',
-	green_spaces: 'bg-green-100 text-green-800',
-	water_fountains: 'bg-cyan-100 text-cyan-800',
-};
 
 export default function Card({ spot }: { spot: Spot }) {
 	const datasetId = getDatasetIdFromCategory(spot.category);

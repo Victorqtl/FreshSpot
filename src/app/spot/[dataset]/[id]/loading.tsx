@@ -46,23 +46,6 @@ export default function Loading() {
 							<Euro className='size-5 text-gray-300' />
 							<div className='flex items-center gap-2'>
 								<div className='size-4 bg-gray-200 rounded-full animate-pulse'></div>
-								<div className='h-5 bg-gray-200 rounded w-16 animate-pulse'></div>
-							</div>
-						</div>
-
-						<div className='flex items-center gap-3'>
-							<Clock className='size-5 text-gray-300' />
-							<div className='flex items-center gap-2'>
-								<div className='size-4 bg-gray-200 rounded-full animate-pulse'></div>
-								<div className='h-5 bg-gray-200 rounded w-24 animate-pulse'></div>
-							</div>
-						</div>
-
-						<div className='flex items-center gap-3'>
-							<Calendar className='size-5 text-gray-300' />
-							<div className='flex items-center gap-2'>
-								<div className='size-4 bg-gray-200 rounded-full animate-pulse'></div>
-								<div className='h-5 bg-gray-200 rounded w-32 animate-pulse'></div>
 							</div>
 						</div>
 					</div>
@@ -80,7 +63,7 @@ export default function Loading() {
 
 			<div className='mb-8'>
 				<h2 className='text-xl font-semibold text-secondary mb-4'>Carte</h2>
-				<div className='h-64 w-full bg-gray-200 rounded-lg animate-pulse flex items-center justify-center'>
+				<div className='h-80 w-full bg-gray-200 rounded-lg animate-pulse flex items-center justify-center'>
 					<span className='text-gray-400'>Chargement de la carte...</span>
 				</div>
 			</div>

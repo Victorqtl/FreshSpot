@@ -55,7 +55,7 @@ export default async function SpotPage({ params }: SpotPageProps) {
 
 			{/* Header */}
 			<div className='mb-8'>
-				<div className='flex flex-col lg:flex-row items-center justify-between gap-4 mb-4'>
+				<div className='flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4'>
 					<h1 className='text-3xl font-bold text-secondary'>{spot.name || 'Spot sans nom'}</h1>
 					<div className='flex items-center gap-2'>
 						{getCategoryLabel(spot.category) === 'Fontaine à boire' ? (
@@ -234,6 +234,11 @@ export default async function SpotPage({ params }: SpotPageProps) {
 					/>
 				</div>
 			)}
+			<Button className='py-6'>
+				<Link href={`https://www.google.com/maps/search/?api=1&query=${spot.geo.lat},${spot.geo.lon}`}>
+					Ouvrir dans Google Maps
+				</Link>
+			</Button>
 		</main>
 	);
 }

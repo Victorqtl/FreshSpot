@@ -33,27 +33,19 @@ export default async function SpotsData({ searchParams }: SpotsDataProps) {
 	const startItem = (currentPage - 1) * itemsPerPage + 1;
 	const endItem = Math.min(currentPage * itemsPerPage, paginationData.totalCount);
 
-	// Check if any filters are active
-	const hasActiveFilters =
-		(filters.categories && filters.categories.length > 0) ||
-		(filters.districts && filters.districts.length > 0) ||
-		(filters.types && filters.types.length > 0) ||
-		(filters.paid && filters.paid !== '');
 
 	return (
 		<div className='flex flex-col w-full lg:w-[70%]'>
 			{/* Results count */}
-			{(searchQuery || hasActiveFilters) && (
-				<div className='mb-4 text-sm text-gray-600'>
-					Affichage de {startItem} à {endItem} sur {paginationData.totalCount} spots
-					{searchQuery && (
-						<>
-							{' '}
-							pour la recherche <span className='font-bold'>&quot;{searchQuery}&quot;</span>
-						</>
-					)}
-				</div>
-			)}
+			<div className='mb-4 text-sm text-gray-600'>
+				Affichage de {startItem} à {endItem} sur {paginationData.totalCount} spots
+				{searchQuery && (
+					<>
+						{' '}
+						pour la recherche <span className='font-bold'>&quot;{searchQuery}&quot;</span>
+					</>
+				)}
+			</div>
 
 			<Cards
 				spots={paginationData.spots}

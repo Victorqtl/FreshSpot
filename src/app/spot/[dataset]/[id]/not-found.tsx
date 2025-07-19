@@ -17,7 +17,7 @@ export default function NotFound() {
 					<div className='space-y-2'>
 						<h1 className='text-3xl font-bold text-gray-900'>Spot introuvable</h1>
 						<p className='text-lg text-gray-600 max-w-md mx-auto'>
-							Le spot que vous recherchez n'existe pas ou n'est plus disponible.
+							Le spot que vous recherchez n&apos;existe pas ou n&apos;est plus disponible.
 						</p>
 					</div>
 				</div>
