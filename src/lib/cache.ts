@@ -61,11 +61,3 @@ export function cacheFilterOptions(options: FilterOptions): void {
 export function getCachedFilterOptions(): FilterOptions | null {
 	return isCacheValid(filterOptionsCache) ? filterOptionsCache!.data : null;
 }
-
-/**
- * Clear all caches (useful for development or manual refresh)
- */
-export function clearCaches(): void {
-	spotsCache = null;
-	filterOptionsCache = null;
-}
