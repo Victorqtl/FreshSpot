@@ -1,15 +1,15 @@
 # FreshSpot
 
-**D�couvrez les spots rafraîchissants de Paris !**
+**Découvrez les spots rafraîchissants de Paris !**
 
-FreshSpot est une application web moderne qui vous aide � trouver les meilleurs endroits pour vous rafraîchir � Paris : espaces verts, activités rafraîchissantes, et fontaines à boire. Toutes les données proviennent des APIs ouvertes de la Ville de Paris.
+FreshSpot est une application web moderne qui vous aide à trouver les meilleurs endroits pour vous rafraîchir à Paris : espaces verts, activités rafraîchissantes, et fontaines à boire. Toutes les données proviennent des APIs ouvertes de la Ville de Paris.
 
 ## Fonctionnalités
 
 ### Filtrage et recherche intelligente
 
 -   **Arrondissements** : Support 75001, "1er", "1ème"
--   **Catégories** : S�lection multiple (Activités, Espaces verts, Fontaines)
+-   **Catégories** : Sélection multiple (Activités, Espaces verts, Fontaines)
 -   **Persistance URL** : Filtres et recherches sauvegardés dans l'URLt
 
 ### Performance
@@ -43,14 +43,14 @@ FreshSpot est une application web moderne qui vous aide � trouver les meilleur
 ### UI/UX
 
 -   **shadcn/ui** - Composants UI modernes
--   **Lucide Icons** - Ic�nes coh�rentes
+-   **Lucide Icons** - Icônes cohérentes
 -   **Polices Nexa** - Design typographique
 
 ### Données APIs
 
 ### Sources de Données
 
-1. **Activit�s & �quipements**
+1. **Activités & équipements**
 
     - Dataset: `ilots-de-fraicheur-equipements-activites`
     - Source: opendata.paris.fr
@@ -62,7 +62,7 @@ FreshSpot est une application web moderne qui vous aide � trouver les meilleur
     - Source: parisdata.opendatasoft.com
     - Contenu: Parcs, jardins, squares...
 
-3. **Fontaines � Boire**
+3. **Fontaines à Boire**
     - Dataset: `fontaines-a-boire`
     - Source: opendata.paris.fr
     - Contenu: Fontaines publiques, points d'eau
@@ -109,7 +109,7 @@ pnpm dev
 # Build production
 pnpm build
 
-# D�marrer en production
+# Démarrer en production
 pnpm start
 
 # Linting
