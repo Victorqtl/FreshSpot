@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { fetchSpotByDatasetAndId } from '@/lib/fetch-spot-by-id';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, Euro, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { MapPin, Clock, Euro, Calendar, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -120,24 +120,20 @@ export default async function SpotPage({ params }: SpotPageProps) {
 
 					<div className='space-y-3'>
 						{/* Paid Status */}
-						{spot.is_paid !== undefined && (
-							<div className='flex items-center gap-3'>
-								<Euro className='size-5 text-gray-500' />
-								<div className='flex items-center gap-2'>
-									{spot.is_paid === 'Oui' ? (
-										<>
-											<XCircle className='size-4 text-red-500' />
-											<span className='text-red-700 font-medium'>Payant</span>
-										</>
-									) : (
-										<>
-											<CheckCircle className='size-4 text-green-500' />
-											<span className='text-green-700 font-medium'>Gratuit</span>
-										</>
-									)}
-								</div>
+						<div className='flex items-center gap-3'>
+							<Euro className='size-5 text-gray-500' />
+							<div className='flex items-center gap-2'>
+								{spot.is_paid === 'Oui' ? (
+									<>
+										<span className='text-red-700 font-medium'>Payant</span>
+									</>
+								) : (
+									<>
+										<span className='text-green-700 font-medium'>Gratuit</span>
+									</>
+								)}
 							</div>
-						)}
+						</div>
 
 						{/* 24h Status */}
 						{spot.is_24h_open === 'Oui' && (

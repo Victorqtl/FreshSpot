@@ -33,7 +33,7 @@ export default function HeroCard({ type }: Props) {
 				}`}></div>
 
 			<div
-				className={`relative flex flex-col justify-between w-[360px] lg:w-[320px] xl:w-[360px] h-[450px] bg-white border-2 border-zinc-200 rounded-2xl p-5 shadow-lg transition-all duration-700 ease-out ${
+				className={`relative flex flex-col justify-between w-[360px] lg:w-[320px] xl:w-[360px] h-[400px] bg-white border-2 border-zinc-200 rounded-2xl p-5 shadow-lg transition-all duration-700 ease-out ${
 					isVisible ? 'lg:translate-y-0 lg:opacity-100' : 'lg:translate-y-16 lg:opacity-0'
 				}`}>
 				<div>
@@ -79,11 +79,11 @@ export default function HeroCard({ type }: Props) {
 									<Badge variant='outline'>Parcs</Badge>
 									<Badge variant='outline'>Jardins</Badge>
 									<Badge variant='outline'>Bois</Badge>
-									<Badge variant='outline'>24h/24</Badge>
-									<Badge variant='outline'>Fraicheur</Badge>
-									<Badge variant='outline'>Bancs</Badge>
+									<Badge variant='outline'>Promenades</Badge>
 									<Badge variant='outline'>Aires de repos</Badge>
+									<Badge variant='outline'>Bancs</Badge>
 									<Badge variant='outline'>Accès gratuit</Badge>
+									<Badge variant='outline'>24h/24</Badge>
 								</div>
 							</div>
 						) : (
