@@ -104,7 +104,7 @@ export default function HeroCard({ type }: Props) {
 				<div>
 					<div className='w-[90%] h-[2px] bg-zinc-200 mx-auto'></div>
 					<a
-						href='/spots'
+						href='/spots?page=1'
 						className='flex items-center justify-end gap-2 mt-6 text-center font-bold text-lg text-primary cursor-pointer group'>
 						Explorer maintenant
 						<ArrowRight

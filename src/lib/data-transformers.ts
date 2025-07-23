@@ -2,6 +2,29 @@ import { ActivityData, GreenSpaceData, FountainData } from '@/types/api-data';
 import { Spot, SpotCategory } from '@/types/spot';
 
 /**
+ * Format text to proper title case (first letter of each word capitalized)
+ */
+export function formatToTitleCase(text: string): string {
+	if (!text) return '';
+	
+	// Convert to lowercase first, then capitalize first letter of each word
+	return text
+		.toLowerCase()
+		.split(' ')
+		.map(word => {
+			// Handle common French articles/prepositions that should stay lowercase
+			const lowercaseWords = ['de', 'du', 'des', 'le', 'la', 'les', 'un', 'une', 'et', 'ou', 'à', 'au', 'aux', 'sur', 'sous', 'dans', 'par'];
+			if (lowercaseWords.includes(word)) {
+				return word;
+			}
+			return word.charAt(0).toUpperCase() + word.slice(1);
+		})
+		.join(' ')
+		// Capitalize first word even if it's an article
+		.replace(/^./, match => match.toUpperCase());
+}
+
+/**
  * Transform district string to standardized format
  */
 export function transformDistrict(value: string): string {
@@ -23,9 +46,9 @@ export function transformActivityToSpot(item: ActivityData): Spot {
 	return {
 		id: item.identifiant,
 		category: 'activities' as SpotCategory,
-		name: item.nom,
-		type: item.type,
-		address: item.adresse,
+		name: formatToTitleCase(item.nom),
+		type: formatToTitleCase(item.type),
+		address: formatToTitleCase(item.adresse),
 		district: item.arrondissement,
 		geo: {
 			lat: item.geo_point_2d?.lat ?? 0,
@@ -53,9 +76,9 @@ export function transformGreenSpaceToSpot(item: GreenSpaceData): Spot {
 	return {
 		id: item.identifiant,
 		category: 'green_spaces' as SpotCategory,
-		name: item.nom,
-		type: item.type,
-		address: item.adresse,
+		name: formatToTitleCase(item.nom),
+		type: formatToTitleCase(item.type),
+		address: formatToTitleCase(item.adresse),
 		district: item.arrondissement,
 		geo: {
 			lat: item.geo_point_2d?.lat ?? 0,
@@ -87,7 +110,7 @@ export function transformFountainToSpot(item: FountainData): Spot {
 		id: item.gid?.toString() || `fountain-${item.geo_point_2d?.lat}-${item.geo_point_2d?.lon}`,
 		category: 'water_fountains' as SpotCategory,
 		name: 'Fontaine à boire',
-		address: item.voie,
+		address: formatToTitleCase(item.voie),
 		district: transformDistrict(item.commune),
 		city: transformDistrict(item.commune),
 		geo: {
@@ -117,9 +140,7 @@ export function transformAPIDataToSpots(data: {
 	const validSpots = allSpots.filter(spot => spot.geo.lat !== 0 || spot.geo.lon !== 0);
 
 	// Remove duplicates based on ID
-	const uniqueSpots = validSpots.filter(
-		(spot, index, array) => array.findIndex(s => s.id === spot.id) === index
-	);
+	const uniqueSpots = validSpots.filter((spot, index, array) => array.findIndex(s => s.id === spot.id) === index);
 
 	return uniqueSpots;
 }

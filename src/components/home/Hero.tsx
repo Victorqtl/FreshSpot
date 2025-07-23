@@ -45,7 +45,7 @@ export default function Hero() {
 							size='cta'
 							className='mt-6 md:mt-8 text-md md:text-lg'
 							asChild>
-							<Link href='/spots'>Trouver un spot frais</Link>
+							<Link href='/spots?page=1'>Trouver un spot frais</Link>
 						</Button>
 					</div>
 					<div className='mt-12 lg:mt-24 flex flex-col items-center gap-10 lg:gap-0 lg:flex-row lg:justify-between'>
